@@ -21,13 +21,13 @@ pcb_list_t all_proc_list;
 process_control_block_t * current_process;
 
 void schedule(void) {
-    DISABLE_INTERRUPTS();
+    disable_interrupts();
     process_control_block_t * new_thread, * old_thread;
 
     // If nothing on the run queue, the current process should just continue
     if (size_pcb_list(&run_queue) == 0) {
         timer_set(10000);
-        ENABLE_INTERRUPTS();
+        enable_interrupts();
         return;
     }
 
@@ -42,7 +42,7 @@ void schedule(void) {
 
     // Context Switch
     switch_to_thread(old_thread, new_thread);
-    ENABLE_INTERRUPTS();
+    enable_interrupts();
 }
 
 void process_init(void) {
@@ -67,7 +67,7 @@ void process_init(void) {
 }
 
 static void reap(void) {
-    DISABLE_INTERRUPTS();
+    disable_interrupts();
     process_control_block_t * new_thread, * old_thread;
 
     // If nothing on the run queue, there is nothing to do now. just loop
@@ -140,7 +140,7 @@ void mutex_lock(mutex_t * lock) {
     while (!try_lock(&lock->lock)) {
 
         // Get the next thread to run.  For now we are using round-robin
-        DISABLE_INTERRUPTS();
+        disable_interrupts();
         new_thread = pop_pcb_list(&run_queue);
         old_thread = current_process;
         current_process = new_thread;
@@ -150,7 +150,7 @@ void mutex_lock(mutex_t * lock) {
 
         // Context Switch
         switch_to_thread(old_thread, new_thread);
-        ENABLE_INTERRUPTS();
+        enable_interrupts();
     }
     lock->locker = current_process;
 }

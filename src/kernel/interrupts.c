@@ -2,6 +2,24 @@
 #include <kernel/kerio.h>
 #include <common/stdlib.h>
 
+static inline int interrupts_enabled(void) {
+    int res;
+    __asm__ __volatile__("mrs %[res], CPSR": [res] "=r" (res)::);
+    return ((res >> 7) & 1) == 0;
+}
+
+void enable_interrupts(void) {
+    if (!interrupts_enabled()) {
+        __asm__ __volatile__("cpsie i");
+    }
+}
+
+void disable_interrupts(void) {
+    if (interrupts_enabled()) {
+        __asm__ __volatile__("cpsid i");
+    }
+}
+
 static interrupt_registers_t * interrupt_regs;
 
 static interrupt_handler_f handlers[NUM_IRQS];
@@ -18,7 +36,7 @@ void interrupts_init(void) {
 	interrupt_regs->irq_gpu_disable1 = 0xffffffff;
 	interrupt_regs->irq_gpu_disable2 = 0xffffffff;
     move_exception_vector();
-    ENABLE_INTERRUPTS();
+    enable_interrupts();
 }
 
 /**
@@ -30,9 +48,9 @@ void irq_handler(void) {
         // If the interrupt is pending and there is a handler, run the handler
         if (IRQ_IS_PENDING(interrupt_regs, j)  && (handlers[j] != 0)) {
 			clearers[j]();
-			ENABLE_INTERRUPTS();
+			enable_interrupts();
 			handlers[j]();
-			DISABLE_INTERRUPTS();
+			disable_interrupts();
 			return;
         }
     }

@@ -14,7 +14,7 @@ switch_to_thread:
     str     sp, [r0]    // Store the stack pointer into the saved_state field of the current process
     // Restore the new thread's state
     ldr     sp, [r1]    // Load the stack pointer of the new process
-    ldr     r0, =#(10000)// Set Quantum time to 10 ms (10000 us)
+    ldr     r0, =10000 // Set Quantum time to 10 ms (10000 us)
     bl      timer_set   // reset the timer to go off in another quantum
     pop     {r0-r12}    // restore the general purpose registers
     msr     cpsr_c, r12   // Restore the new thread's program status register

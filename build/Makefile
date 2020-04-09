@@ -1,5 +1,5 @@
 # Don't use normal gcc, use the arm cross compiler
-TOOLCHAIN = ./gcc-arm-none-eabi-6-2017-q2-update/bin/arm-none-eabi
+TOOLCHAIN = arm-linux-gnueabihf
 CC = $(TOOLCHAIN)-gcc
 OBJCOPY = $(TOOLCHAIN)-objcopy
 GDB = $(TOOLCHAIN)-gdb
@@ -57,16 +57,16 @@ $(OBJ_DIR)/%.o: $(COMMON_SRC)/%.c
 
 clean:
 	rm -rf $(OBJ_DIR)
-	rm $(IMG_NAME).elf
-	rm $(IMG_NAME).img
+	rm -rf $(IMG_NAME).elf
+	rm -rf $(IMG_NAME).img
 
 run: build
-	qemu-system-arm -m 128 -no-reboot -M raspi2 -serial stdio -kernel kernel.elf
+	qemu-system-arm -m 1024 -no-reboot -M raspi2 -serial stdio -kernel kernel.elf
 
 dbg:
 	$(GDB) kernel.elf
 dbgrun: build gdbinit
-	qemu-system-arm -m 128 -no-reboot -M raspi2 -serial stdio -kernel kernel.elf -S -s
+	qemu-system-arm -m 1024 -no-reboot -M raspi2 -serial stdio -kernel kernel.elf -S -s
 
 .PHONY: gdbinit
 gdbinit:
